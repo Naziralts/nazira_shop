@@ -1,0 +1,25 @@
+name: nazira_shop
+description: A professional e-commerce Flutter app for portfolio
+version: 1.0.0+1
+publish_to: "none"
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.5
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  cached_network_image: ^3.2.3
+  go_router: ^8.2.0
+  flutter_stripe: ^9.0.0
+  dio: ^5.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.6
+  hive_generator: ^2.0.0
