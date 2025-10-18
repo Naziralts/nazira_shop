@@ -1,33 +1,13 @@
-import 'models/product_model.dart';
+import 'package:dio/dio.dart';
+import 'package:nazira_shop/features/products/data/models/product_model.dart';
+
 
 class ProductsRepository {
-  // Mock data for portfolio
-  final List<Product> _products = [
-    Product(
-      id: 1,
-      title: 'Smartphone',
-      description: 'High quality smartphone',
-      image: 'https://via.placeholder.com/150',
-      price: 299.99,
-    ),
-    Product(
-      id: 2,
-      title: 'Laptop',
-      description: 'Powerful laptop',
-      image: 'https://via.placeholder.com/150',
-      price: 799.99,
-    ),
-    Product(
-      id: 3,
-      title: 'Headphones',
-      description: 'Noise cancelling',
-      image: 'https://via.placeholder.com/150',
-      price: 99.99,
-    ),
-  ];
+  final Dio dio = Dio(BaseOptions(baseUrl: 'https://fakestoreapi.com/'));
 
-  List<Product> getAllProducts() => _products;
-
-  Product getProductById(int id) =>
-      _products.firstWhere((product) => product.id == id);
+  Future<List<ProductModel>> getProducts() async {
+    final response = await dio.get('/products');
+    final data = response.data as List;
+    return data.map((json) => ProductModel.fromJson(json)).toList();
+  }
 }
