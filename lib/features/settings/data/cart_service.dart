@@ -1,39 +1,52 @@
-import 'package:hive/hive.dart';
-import '../../../core/constants/hive_boxes.dart';
-
 class CartItem {
-  final int productId;
+  final String productId;
   int quantity;
-  CartItem({required this.productId, this.quantity = 1});
+
+  CartItem({
+    required this.productId,
+    this.quantity = 1,
+  });
 }
 
 class CartService {
-  final Box _box = Hive.box(HiveBoxes.cartBox);
+  static final CartService _instance = CartService._internal();
+  factory CartService() => _instance;
+  CartService._internal();
 
-  List<CartItem> getCartItems() => _box.values
-      .map((e) => CartItem(productId: e['productId'], quantity: e['quantity']))
-      .toList();
+  final List<CartItem> _cartItems = [];
 
-  void addToCart(int productId) {
-    if (_box.containsKey(productId)) {
-      final item = _box.get(productId);
-      item['quantity'] += 1;
-      _box.put(productId, item);
+  List<CartItem> getCartItems() => _cartItems;
+
+  void addToCart(String productId) {
+    final existing = _cartItems.where((item) => item.productId == productId);
+    if (existing.isNotEmpty) {
+      existing.first.quantity++;
     } else {
-      _box.put(productId, {'productId': productId, 'quantity': 1});
+      _cartItems.add(CartItem(productId: productId));
     }
   }
 
-  void removeFromCart(int productId) => _box.delete(productId);
+  void updateQuantity(String productId, int quantity) {
+    for (var item in _cartItems) {
+      if (item.productId == productId) {
+        item.quantity = quantity;
+        break;
+      }
+    }
+  }
 
-  void updateQuantity(int productId, int quantity) =>
-      _box.put(productId, {'productId': productId, 'quantity': quantity});
+  void removeFromCart(String productId) {
+    _cartItems.removeWhere((item) => item.productId == productId);
+  }
 
-  double getTotalPrice(Map<int, double> productPrices) {
+  void clearCart() {
+    _cartItems.clear();
+  }
+
+  double getTotalPrice(Map<String, double> prices) {
     double total = 0;
-    for (var item in getCartItems()) {
-      final price = productPrices[item.productId] ?? 0;
-      total += price * item.quantity;
+    for (var item in _cartItems) {
+      total += (prices[item.productId] ?? 0) * item.quantity;
     }
     return total;
   }
