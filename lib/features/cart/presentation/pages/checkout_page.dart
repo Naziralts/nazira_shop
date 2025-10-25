@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
 import 'package:nazira_shop/features/settings/data/cart_service.dart';
-
 import '../../../products/data/products_repository.dart';
 
 class CheckoutPage extends StatelessWidget {
@@ -9,31 +7,45 @@ class CheckoutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cartService = CartService();
+    final cartService = CartService(); // Singleton instance
     final repository = ProductsRepository();
     final cartItems = cartService.getCartItems();
 
-    double total = cartService.getTotalPrice({
+    // productPrices map түзүү
+    final productPrices = {
       for (var product in repository.getAllProducts()) product.id: product.price
-    });
+    };
+
+    // total сумманы эсептөө
+    double total = cartService.getTotalPrice(productPrices);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Total: \$${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 24)),
+            Text('Total: \$${total.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             ElevatedButton(
               child: const Text('Pay with Stripe (Test)'),
-              onPressed: () async {
-                // Mock payment, no real transaction
+              onPressed: () {
+                // Mock payment, real transaction жок
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Payment Success (Test)')),
                 );
-                cartService.getCartItems().forEach((item) => cartService.removeFromCart(item.productId));
-                Navigator.pop(context);
+
+                // Cart тазалоо
+                for (var item in cartItems) {
+                  final productId = item['productId'] as String?;
+                  if (productId != null) {
+                    cartService.removeFromCart(productId);
+                  }
+                }
+
+                Navigator.pop(context); // Checkout page жабуу
               },
             ),
           ],
