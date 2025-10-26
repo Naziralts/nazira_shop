@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nazira_shop/features/cart/presentation/pages/cart_page.dart';
 import 'package:nazira_shop/features/cart/presentation/pages/checkout_page.dart';
@@ -6,17 +7,17 @@ import 'package:nazira_shop/features/settings/data/favorites/presentation/pages/
 
 import 'features/products/presentation/pages/products_page.dart';
 
-
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Hive initialize
+  // ✅ Flutter Web үчүн Hiveди туура инициализациялоо
   await Hive.initFlutter();
 
-  // Boxes ачуу
-  await Hive.openBox('cart');
-  await Hive.openBox('favorites');
+  // ✅ Hive Box'торду ачабыз (Chrome'до delay болушу мүмкүн)
+  await Future.wait([
+    Hive.openBox('cart'),
+    Hive.openBox('favorites'),
+  ]);
 
   runApp(const NaziraShopApp());
 }

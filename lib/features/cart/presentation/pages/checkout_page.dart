@@ -17,7 +17,7 @@ class CheckoutPage extends StatelessWidget {
     };
 
     // total сумманы эсептөө
-    double total = cartService.getTotalPrice(productPrices);
+    double total = cartService.getTotalPrice(productPrices, cartItems as List<Map<String, dynamic>>); // Assuming cartItems is the second argument
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
@@ -31,14 +31,14 @@ class CheckoutPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               child: const Text('Pay with Stripe (Test)'),
-              onPressed: () {
+              onPressed: () async {
                 // Mock payment, real transaction жок
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Payment Success (Test)')),
                 );
 
                 // Cart тазалоо
-                for (var item in cartItems) {
+                for (var item in await cartItems) {
                   final productId = item['productId'] as String?;
                   if (productId != null) {
                     cartService.removeFromCart(productId);

@@ -1,19 +1,28 @@
-import 'package:hive/hive.dart';
-import 'package:nazira_shop/core/constants/hive_boxes.dart';
-
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesService {
-  final Box _box = Hive.box(HiveBoxes.favoritesBox);
+  static final FavoritesService _instance = FavoritesService._internal();
+  factory FavoritesService() => _instance;
+  FavoritesService._internal();
 
-  List<int> getFavorites() => _box.values.cast<int>().toList();
+  final String _favoritesKey = 'favorites';
 
-  bool isFavorite(int productId) => _box.containsKey(productId);
+  Future<List<String>> getFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_favoritesKey);
+    if (jsonString == null) return [];
+    return List<String>.from(jsonDecode(jsonString));
+  }
 
-  void toggleFavorite(int productId) {
-    if (isFavorite(productId)) {
-      _box.delete(productId);
+  Future<void> toggleFavorite(String productId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final favorites = await getFavorites();
+    if (favorites.contains(productId)) {
+      favorites.remove(productId);
     } else {
-      _box.put(productId, productId);
+      favorites.add(productId);
     }
+    await prefs.setString(_favoritesKey, jsonEncode(favorites));
   }
 }

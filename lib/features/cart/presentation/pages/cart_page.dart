@@ -55,3 +55,9 @@ class CartPage extends StatelessWidget {
     );
   }
 }
+
+extension on Future<List<Map<String, dynamic>>> {
+  int? get length => null;
+
+  operator [](int other) {}
+}

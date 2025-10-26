@@ -20,6 +20,8 @@ class _ProductsPageState extends State<ProductsPage> {
   final CartService _cartService = CartService();
 
   late List<ProductModel> _products;
+  
+  double? get quantity => null;
 
   @override
   void initState() {
@@ -32,12 +34,12 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   void _toggleFavorite(String productId) {
-    _favoritesService.toggleFavorite(productId as int);
+    _favoritesService.toggleFavorite(productId as String);
     setState(() {});
   }
 
   void _addToCart(String productId) {
-    _cartService.addToCart(productId);
+    _cartService.addToCart(productId, quantity!); // Assuming 'quantity' is defined elsewhere
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Added to cart')),
     );
@@ -157,4 +159,8 @@ class _ProductsPageState extends State<ProductsPage> {
             ),
     );
   }
+}
+
+extension on Future<List<String>> {
+  contains(String id) {}
 }

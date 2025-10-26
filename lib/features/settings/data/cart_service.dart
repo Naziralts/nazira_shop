@@ -1,43 +1,55 @@
-import 'package:hive/hive.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartService {
-  // Singleton pattern
   static final CartService _instance = CartService._internal();
   factory CartService() => _instance;
   CartService._internal();
 
-  // Hive box’ту колдонууда гана ачат
-  Box get _cartBox => Hive.box('cart');
+  final String _cartKey = 'cart_items';
 
-  // Cart методдору
-  void addToCart(String productId) {
-    final existing = _cartBox.get(productId);
-    if (existing != null) {
-      _cartBox.put(productId, {'productId': productId, 'quantity': existing['quantity'] + 1});
+  Future<List<Map<String, dynamic>>> getCartItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_cartKey);
+    if (jsonString == null) return [];
+    return List<Map<String, dynamic>>.from(jsonDecode(jsonString));
+  }
+
+  Future<void> addToCart(String productId, double price) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cart = await getCartItems();
+    final existing = cart.indexWhere((item) => item['productId'] == productId);
+
+    if (existing != -1) {
+      cart[existing]['quantity']++;
     } else {
-      _cartBox.put(productId, {'productId': productId, 'quantity': 1});
+      cart.add({'productId': productId, 'price': price, 'quantity': 1});
+    }
+
+    await prefs.setString(_cartKey, jsonEncode(cart));
+  }
+
+  Future<void> removeFromCart(String productId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cart = await getCartItems();
+    cart.removeWhere((item) => item['productId'] == productId);
+    await prefs.setString(_cartKey, jsonEncode(cart));
+  }
+
+  Future<void> updateQuantity(String productId, int quantity) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cart = await getCartItems();
+    final index = cart.indexWhere((item) => item['productId'] == productId);
+    if (index != -1) {
+      cart[index]['quantity'] = quantity;
+      await prefs.setString(_cartKey, jsonEncode(cart));
     }
   }
 
-  void removeFromCart(String productId) => _cartBox.delete(productId);
-
-  void updateQuantity(String productId, int quantity) {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      _cartBox.put(productId, {'productId': productId, 'quantity': quantity});
-    }
-  }
-
-  List<Map<String, dynamic>> getCartItems() {
-    return _cartBox.values.map((e) => Map<String, dynamic>.from(e)).toList();
-  }
-
-  double getTotalPrice(Map<String, double> prices) {
+  double getTotalPrice(Map<String, double> prices, List<Map<String, dynamic>> cart) {
     double total = 0;
-    for (var item in getCartItems()) {
-      final price = prices[item['productId']] ?? 0;
-      total += price * (item['quantity'] ?? 1);
+    for (var item in cart) {
+      total += (prices[item['productId']] ?? 0) * item['quantity'];
     }
     return total;
   }

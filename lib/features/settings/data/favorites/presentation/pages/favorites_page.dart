@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nazira_shop/features/products/data/models/product_model.dart';
 import 'package:nazira_shop/features/products/data/products_repository.dart';
 import '../../data/favorites_service.dart';
 
@@ -49,7 +50,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        favoritesService.toggleFavorite(product.id as int);
+                        favoritesService.toggleFavorite(product.id as String);
                         setState(() {});
                       },
                     ),
@@ -59,4 +60,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ),
     );
   }
+}
+
+extension on Future<List<String>> {
+  map(ProductModel? Function(dynamic id) param0) {}
 }
